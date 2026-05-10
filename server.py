@@ -12,7 +12,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-GEMINI_API_KEY = "AIzaSyCoQHiL0iizyN-aBHFWA_d7ua6c-wUE6e4"
+GEMINI_API_KEY = "AIzaSyCSTRFa36ROcmrzpE1Pe675RGLr2xH3t1U"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
 class ChatRequest(BaseModel):
