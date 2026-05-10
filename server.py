@@ -1,4 +1,3 @@
-```python
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -40,4 +39,3 @@ def chat(req: ChatRequest):
         return {"reply": reply}
     except Exception as e:
         return {"reply": f"Ошибка: {str(e)}"}
-```
