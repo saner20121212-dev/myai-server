@@ -35,8 +35,16 @@ def chat(req: ChatRequest):
             for chunk in stream:
                 delta = chunk.choices[0].delta.content
                 if delta:
-                    yield delta
+                    yield delta.encode("utf-8")
 
-        return StreamingResponse(generate(), media_type="text/plain")
+        return StreamingResponse(
+            generate(),
+            media_type="text/plain; charset=utf-8",
+            headers={
+                "X-Accel-Buffering": "no",
+                "Cache-Control": "no-cache",
+                "Transfer-Encoding": "chunked"
+            }
+        )
     except Exception as e:
         return {"reply": f"Ошибка: {str(e)}"}
