@@ -12,8 +12,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "llama3.2"
+GEMINI_API_KEY = "AIzaSyD3pnJRqivlkchRTedsFcL2EcZ6xDXlJ7g"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
 class ChatRequest(BaseModel):
     message: str
