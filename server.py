@@ -1,3 +1,4 @@
+```python
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -12,8 +13,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "llama3.2"
+GEMINI_API_KEY = "AIzaSyD3pnJRqivlkchRTedsFcL2EcZ6xDXlJ7g"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
 
 class ChatRequest(BaseModel):
     message: str
@@ -26,16 +27,17 @@ def home():
 def chat(req: ChatRequest):
     try:
         response = requests.post(
-            OLLAMA_URL,
+            GEMINI_URL,
             json={
-                "model": MODEL,
-                "prompt": req.message,
-                "stream": False
+                "contents": [
+                    {"parts": [{"text": req.message}]}
+                ]
             },
-            headers={"ngrok-skip-browser-warning": "true"},
-            timeout=120
+            timeout=30
         )
         data = response.json()
-        return {"reply": data.get("response", "No response")}
+        reply = data["candidates"][0]["content"]["parts"][0]["text"]
+        return {"reply": reply}
     except Exception as e:
-        return {"reply": f"Ошибка сервера: {str(e)}"}
+        return {"reply": f"Ошибка: {str(e)}"}
+```
