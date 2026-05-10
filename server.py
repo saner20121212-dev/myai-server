@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import requests
+from groq import Groq
 
 app = FastAPI()
 
@@ -12,8 +12,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-GEMINI_API_KEY = "AIzaSyD8L6OyziM3-MTkiEow70qKt-NCfQuiblE"
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+client = Groq(api_key="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")
 
 class ChatRequest(BaseModel):
     message: str
@@ -25,22 +24,12 @@ def home():
 @app.post("/chat")
 def chat(req: ChatRequest):
     try:
-        response = requests.post(
-            GEMINI_URL,
-            json={
-                "contents": [
-                    {"parts": [{"text": req.message}]}
-                ]
-            },
-            timeout=30
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": req.message}],
+            max_tokens=1024
         )
-        data = response.json()
-        if "candidates" in data:
-            reply = data["candidates"][0]["content"]["parts"][0]["text"]
-        elif "error" in data:
-            reply = f"Gemini ошибка: {data['error']['message']}"
-        else:
-            reply = f"Неожиданный ответ: {str(data)}"
+        reply = completion.choices[0].message.content
         return {"reply": reply}
     except Exception as e:
         return {"reply": f"Ошибка: {str(e)}"}
