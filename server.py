@@ -12,8 +12,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-GEMINI_API_KEY = "AIzaSyD3pnJRqivlkchRTedsFcL2EcZ6xDXlJ7g"
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODEL = "llama3.2"
 
 class ChatRequest(BaseModel):
     message: str
@@ -26,16 +26,16 @@ def home():
 def chat(req: ChatRequest):
     try:
         response = requests.post(
-            GEMINI_URL,
+            OLLAMA_URL,
             json={
-                "contents": [
-                    {"parts": [{"text": req.message}]}
-                ]
+                "model": MODEL,
+                "prompt": req.message,
+                "stream": False
             },
-            timeout=30
+            headers={"ngrok-skip-browser-warning": "true"},
+            timeout=120
         )
         data = response.json()
-        reply = data["candidates"][0]["content"]["parts"][0]["text"]
-        return {"reply": reply}
+        return {"reply": data.get("response", "No response")}
     except Exception as e:
-        return {"reply": f"Ошибка: {str(e)}"}
+        return {"reply": f"Ошибка сервера: {str(e)}"}
