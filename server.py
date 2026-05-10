@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from groq import Groq
 
@@ -24,12 +25,18 @@ def home():
 @app.post("/chat")
 def chat(req: ChatRequest):
     try:
-        completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": req.message}],
-            max_tokens=1024
-        )
-        reply = completion.choices[0].message.content
-        return {"reply": reply}
+        def generate():
+            stream = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": req.message}],
+                max_tokens=1024,
+                stream=True
+            )
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content
+                if delta:
+                    yield delta
+
+        return StreamingResponse(generate(), media_type="text/plain")
     except Exception as e:
         return {"reply": f"Ошибка: {str(e)}"}
