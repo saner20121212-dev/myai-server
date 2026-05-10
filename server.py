@@ -26,16 +26,21 @@ def home():
 def chat(req: ChatRequest):
     try:
         response = requests.post(
-            OLLAMA_URL,
+            GEMINI_URL,
             json={
-                "model": MODEL,
-                "prompt": req.message,
-                "stream": False
+                "contents": [
+                    {"parts": [{"text": req.message}]}
+                ]
             },
-            headers={"ngrok-skip-browser-warning": "true"},
-            timeout=120
+            timeout=30
         )
         data = response.json()
-        return {"reply": data.get("response", "No response")}
+        if "candidates" in data:
+            reply = data["candidates"][0]["content"]["parts"][0]["text"]
+        elif "error" in data:
+            reply = f"Gemini ошибка: {data['error']['message']}"
+        else:
+            reply = f"Неожиданный ответ: {str(data)}"
+        return {"reply": reply}
     except Exception as e:
-        return {"reply": f"Ошибка сервера: {str(e)}"}
+        return {"reply": f"Ошибка: {str(e)}"}
